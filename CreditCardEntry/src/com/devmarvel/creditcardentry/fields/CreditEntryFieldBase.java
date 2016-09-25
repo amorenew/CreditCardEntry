@@ -35,10 +35,8 @@ import java.lang.reflect.Field;
 public abstract class CreditEntryFieldBase extends EditText implements
         TextWatcher, OnKeyListener, OnClickListener {
 
-    CreditCardFieldDelegate delegate;
-
     final Context context;
-
+    CreditCardFieldDelegate delegate;
     String lastValue = null;
 
     private boolean valid = false;
@@ -65,15 +63,15 @@ public abstract class CreditEntryFieldBase extends EditText implements
         init(null);
     }
 
-	void init(AttributeSet attrs) {
-		setGravity(Gravity.CENTER);
-		setImeOptions(EditorInfo.IME_FLAG_NO_EXTRACT_UI);
-		setBackgroundColor(getResources().getColor(color.transparent));
-		setInputType(InputType.TYPE_CLASS_NUMBER);
-		addTextChangedListener(this);
-		setOnKeyListener(this);
-		setOnClickListener(this);
-		setPadding(20, 0, 20, 0);
+    void init(AttributeSet attrs) {
+        setGravity(Gravity.CENTER);
+        setImeOptions(EditorInfo.IME_FLAG_NO_EXTRACT_UI);
+        setBackgroundColor(getResources().getColor(color.transparent));
+        setInputType(InputType.TYPE_CLASS_NUMBER);
+        addTextChangedListener(this);
+        setOnKeyListener(this);
+        setOnClickListener(this);
+        setPadding(20, 0, 20, 0);
 
         setStyle(attrs);
     }
@@ -83,110 +81,116 @@ public abstract class CreditEntryFieldBase extends EditText implements
             return;
         }
 
-		TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.CreditCardForm);
-		// If CreditCardForm_default_text_colors is true, we will not set any text or cursor colors
-		// and just use the defaults provided by the system / theme.
-		if (!typedArray.getBoolean(R.styleable.CreditCardForm_default_text_colors, false)) {
-			setTextColor(typedArray.getColor(R.styleable.CreditCardForm_text_color, Color.BLACK));
-			setHintTextColor(typedArray.getColor(R.styleable.CreditCardForm_hint_text_color, Color.LTGRAY));
-			setCursorDrawableColor(typedArray.getColor(R.styleable.CreditCardForm_cursor_color, Color.BLACK));
-		}
-		typedArray.recycle();
-	}
+        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.CreditCardForm);
+        // If CreditCardForm_default_text_colors is true, we will not set any text or cursor colors
+        // and just use the defaults provided by the system / theme.
+        if (!typedArray.getBoolean(R.styleable.CreditCardForm_default_text_colors, false)) {
+            setTextColor(typedArray.getColor(R.styleable.CreditCardForm_text_color, Color.BLACK));
+            setHintTextColor(typedArray.getColor(R.styleable.CreditCardForm_hint_text_color, Color.LTGRAY));
+            setCursorDrawableColor(typedArray.getColor(R.styleable.CreditCardForm_cursor_color, Color.BLACK));
+        }
+        typedArray.recycle();
+    }
 
-	@Override
-	public void onTextChanged(CharSequence s, int start, int before, int end) {
-		if (start == 0 && before == 1 && s.length() == 0) {
-			if (delegate != null) {
-				delegate.focusOnPreviousField(this);
-			}
-		} else {
-			String tmp = String.valueOf(s);
-			if (!tmp.equals(lastValue)) {
-				lastValue = tmp;
-				textChanged(s, start, before, end);
-			}
-		}
-	}
+    @Override
+    public void onTextChanged(CharSequence s, int start, int before, int end) {
+        if (start == 0 && before == 1 && s.length() == 0) {
+            if (delegate != null) {
+                delegate.focusOnPreviousField(this);
+            }
+        } else {
+            String tmp = String.valueOf(s);
+            if (!tmp.equals(lastValue)) {
+                lastValue = tmp;
+                textChanged(s, start, before, end);
+            }
+        }
+    }
 
-	public abstract void formatAndSetText(String updatedString);
+    public abstract void formatAndSetText(String updatedString);
 
-    @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-    @Override public void afterTextChanged(Editable s) {}
+    @Override
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+    }
 
-    public void textChanged(CharSequence s, int start, int before, int end) { }
+    @Override
+    public void afterTextChanged(Editable s) {
+    }
 
-	@Override
-	public InputConnection onCreateInputConnection(@NonNull EditorInfo outAttrs) {
-		outAttrs.actionLabel = null;
-		outAttrs.inputType = InputType.TYPE_NULL;
-		outAttrs.imeOptions = EditorInfo.IME_ACTION_NONE;
-		return new BackInputConnection(super.onCreateInputConnection(outAttrs));
-	}
+    public void textChanged(CharSequence s, int start, int before, int end) {
+    }
 
-	@Override
-	public boolean onKey(View v, int keyCode, KeyEvent event) {
-		if (event.getAction() == KeyEvent.ACTION_DOWN)
-			return false;
-		if (keyCode == KeyEvent.KEYCODE_ALT_LEFT
-				|| keyCode == KeyEvent.KEYCODE_ALT_RIGHT
-				|| keyCode == KeyEvent.KEYCODE_SHIFT_LEFT
-				|| keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT)
-			return false;
+    @Override
+    public InputConnection onCreateInputConnection(@NonNull EditorInfo outAttrs) {
+        outAttrs.actionLabel = null;
+        outAttrs.inputType = InputType.TYPE_NULL;
+        outAttrs.imeOptions = EditorInfo.IME_ACTION_NONE;
+        return new BackInputConnection(super.onCreateInputConnection(outAttrs));
+    }
 
-		if (keyCode == KeyEvent.KEYCODE_DEL
-				&& this.getText().toString().length() == 0) {
-			if (delegate != null) {
-				delegate.focusOnPreviousField(this);
-			}
-		}
-		return false;
-	}
+    @Override
+    public boolean onKey(View v, int keyCode, KeyEvent event) {
+        if (event.getAction() == KeyEvent.ACTION_DOWN)
+            return false;
+        if (keyCode == KeyEvent.KEYCODE_ALT_LEFT
+                || keyCode == KeyEvent.KEYCODE_ALT_RIGHT
+                || keyCode == KeyEvent.KEYCODE_SHIFT_LEFT
+                || keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT)
+            return false;
 
-	@Override
-	public void onClick(View v) {
-		setSelection(getText().length());
-	}
+        if (keyCode == KeyEvent.KEYCODE_DEL
+                && this.getText().toString().length() == 0) {
+            if (delegate != null) {
+                delegate.focusOnPreviousField(this);
+            }
+        }
+        return false;
+    }
 
-	@SuppressWarnings("unused")
-	public CreditCardFieldDelegate getDelegate() {
-		return delegate;
-	}
+    @Override
+    public void onClick(View v) {
+        setSelection(getText().length());
+    }
 
-	public void setDelegate(CreditCardFieldDelegate delegate) {
-		this.delegate = delegate;
-	}
+    @SuppressWarnings("unused")
+    public CreditCardFieldDelegate getDelegate() {
+        return delegate;
+    }
 
-	public abstract void setHelperText(String helperText);
+    public void setDelegate(CreditCardFieldDelegate delegate) {
+        this.delegate = delegate;
+    }
 
-	public abstract String getHelperText();
+    public abstract String getHelperText();
 
-	public boolean isValid() {
-		return valid;
-	}
+    public abstract void setHelperText(String helperText);
 
-	void setValid(boolean valid) {
-		this.valid = valid;
-	}
+    public boolean isValid() {
+        return valid;
+    }
 
-	private void backInput() {
-		if (this.getText().toString().length() == 0) {
-			if (delegate != null) {
-				delegate.focusOnPreviousField(this);
-			}
-		}
-	}
+    void setValid(boolean valid) {
+        this.valid = valid;
+    }
+
+    private void backInput() {
+        if (this.getText().toString().length() == 0) {
+            if (delegate != null) {
+                delegate.focusOnPreviousField(this);
+            }
+        }
+    }
 
     @Override
     public Parcelable onSaveInstanceState() {
         Bundle bundle = new Bundle();
         bundle.putParcelable("instanceState", super.onSaveInstanceState());
-		bundle.putBoolean("focus", hasFocus());
-		bundle.putString("stateToSave", String.valueOf(this.getText()));
+        bundle.putBoolean("focus", hasFocus());
+        bundle.putString("stateToSave", String.valueOf(this.getText()));
         return bundle;
     }
 
-	@Override
+    @Override
     public void onRestoreInstanceState(Parcelable state) {
         if (state instanceof Bundle) {
             Bundle bundle = (Bundle) state;
@@ -199,6 +203,29 @@ public abstract class CreditEntryFieldBase extends EditText implements
                 requestFocus();
         } else {
             super.onRestoreInstanceState(state);
+        }
+    }
+
+    public void setCursorDrawableColor(int color) {
+        //http://stackoverflow.com/questions/25996032/how-to-change-programatically-edittext-cursor-color-in-android
+        try {
+            Field fCursorDrawableRes = TextView.class.getDeclaredField("mCursorDrawableRes");
+            fCursorDrawableRes.setAccessible(true);
+            int mCursorDrawableRes = fCursorDrawableRes.getInt(this);
+            Field fEditor = TextView.class.getDeclaredField("mEditor");
+            fEditor.setAccessible(true);
+            Object editor = fEditor.get(this);
+            Class<?> clazz = editor.getClass();
+            Field fCursorDrawable = clazz.getDeclaredField("mCursorDrawable");
+            fCursorDrawable.setAccessible(true);
+            Drawable[] drawables = new Drawable[2];
+            drawables[0] = ContextCompat.getDrawable(getContext(), mCursorDrawableRes);
+            drawables[1] = ContextCompat.getDrawable(getContext(), mCursorDrawableRes);
+            drawables[0].setColorFilter(color, PorterDuff.Mode.SRC_IN);
+            drawables[1].setColorFilter(color, PorterDuff.Mode.SRC_IN);
+            fCursorDrawable.set(editor, drawables);
+        } catch (final Throwable ignored) {
+            //
         }
     }
 
@@ -245,29 +272,6 @@ public abstract class CreditEntryFieldBase extends EditText implements
                         0, KeyCharacterMap.VIRTUAL_KEYBOARD, 0, flags));
                 return true;
             }
-        }
-    }
-
-    public void setCursorDrawableColor(int color) {
-        //http://stackoverflow.com/questions/25996032/how-to-change-programatically-edittext-cursor-color-in-android
-        try {
-            Field fCursorDrawableRes = TextView.class.getDeclaredField("mCursorDrawableRes");
-            fCursorDrawableRes.setAccessible(true);
-            int mCursorDrawableRes = fCursorDrawableRes.getInt(this);
-            Field fEditor = TextView.class.getDeclaredField("mEditor");
-            fEditor.setAccessible(true);
-            Object editor = fEditor.get(this);
-            Class<?> clazz = editor.getClass();
-            Field fCursorDrawable = clazz.getDeclaredField("mCursorDrawable");
-            fCursorDrawable.setAccessible(true);
-            Drawable[] drawables = new Drawable[2];
-            drawables[0] = ContextCompat.getDrawable(getContext(), mCursorDrawableRes);
-            drawables[1] = ContextCompat.getDrawable(getContext(), mCursorDrawableRes);
-            drawables[0].setColorFilter(color, PorterDuff.Mode.SRC_IN);
-            drawables[1].setColorFilter(color, PorterDuff.Mode.SRC_IN);
-            fCursorDrawable.set(editor, drawables);
-        } catch (final Throwable ignored) {
-            //
         }
     }
 

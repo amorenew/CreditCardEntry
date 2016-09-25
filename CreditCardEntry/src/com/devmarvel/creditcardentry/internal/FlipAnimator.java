@@ -8,99 +8,90 @@ import android.view.animation.Animation;
 import android.view.animation.Transformation;
 
 class FlipAnimator extends Animation {
-	private Camera camera;
+    private final float centerX;
+    private final float centerY;
+    private Camera camera;
+    private View fromView;
+    private View toView;
+    private boolean forward = true;
 
-	private View fromView;
+    private boolean visibilitySwapped;
 
-	private View toView;
+    /**
+     * Creates a 3D flip animation between two views. If forward is true, its
+     * assumed that view1 is "visible" and view2 is "gone" before the animation
+     * starts. At the end of the animation, view1 will be "gone" and view2 will
+     * be "visible". If forward is false, the reverse is assumed.
+     *
+     * @param fromView First view in the transition.
+     * @param toView   Second view in the transition.
+     * @param centerX  The center of the views in the x-axis.
+     * @param centerY  The center of the views in the y-axis.
+     */
+    public FlipAnimator(View fromView, View toView) {
+        this.fromView = fromView;
+        this.toView = toView;
+        View v = toView;
+        if (fromView.getVisibility() == View.VISIBLE) {
+            v = fromView;
+        }
+        this.centerX = v.getWidth() / 2;
+        this.centerY = v.getHeight() / 2;
 
-	private final float centerX;
+        setDuration(500);
+        setFillAfter(true);
+        setInterpolator(new AccelerateDecelerateInterpolator());
+    }
 
-	private final float centerY;
+    public void reverse() {
+        forward = false;
+        View temp = toView;
+        toView = fromView;
+        fromView = temp;
+    }
 
-	private boolean forward = true;
+    @Override
+    public void initialize(int width, int height, int parentWidth,
+                           int parentHeight) {
+        super.initialize(width, height, parentWidth, parentHeight);
+        camera = new Camera();
+    }
 
-	private boolean visibilitySwapped;
+    @Override
+    protected void applyTransformation(float interpolatedTime, Transformation t) {
+        // Angle around the y-axis of the rotation at the given time. It is
+        // calculated both in radians and in the equivalent degrees.
+        final double radians = Math.PI * interpolatedTime;
+        float degrees = (float) (180.0 * radians / Math.PI);
 
-	/**
-	 * Creates a 3D flip animation between two views. If forward is true, its
-	 * assumed that view1 is "visible" and view2 is "gone" before the animation
-	 * starts. At the end of the animation, view1 will be "gone" and view2 will
-	 * be "visible". If forward is false, the reverse is assumed.
-	 * 
-	 * @param fromView
-	 *            First view in the transition.
-	 * @param toView
-	 *            Second view in the transition.
-	 * @param centerX
-	 *            The center of the views in the x-axis.
-	 * @param centerY
-	 *            The center of the views in the y-axis.
-	 */
-	public FlipAnimator(View fromView, View toView) {
-		this.fromView = fromView;
-		this.toView = toView;
-		View v = toView;
-		if(fromView.getVisibility() == View.VISIBLE) {
-			v = fromView;
-		}
-		this.centerX = v.getWidth() / 2;
-		this.centerY = v.getHeight() / 2;
+        // Once we reach the midpoint in the animation, we need to hide the
+        // source view and show the destination view. We also need to change
+        // the angle by 180 degrees so that the destination does not come in
+        // flipped around. This is the main problem with SDK sample, it does not
+        // do this.
+        if (interpolatedTime >= 0.5f) {
+            degrees -= 180.f;
 
-		setDuration(500);
-		setFillAfter(true);
-		setInterpolator(new AccelerateDecelerateInterpolator());
-	}
+            if (!visibilitySwapped) {
+                fromView.setVisibility(View.GONE);
+                toView.setVisibility(View.VISIBLE);
 
-	public void reverse() {
-		forward = false;
-		View temp = toView;
-		toView = fromView;
-		fromView = temp;
-	}
+                visibilitySwapped = true;
+            }
+        }
 
-	@Override
-	public void initialize(int width, int height, int parentWidth,
-			int parentHeight) {
-		super.initialize(width, height, parentWidth, parentHeight);
-		camera = new Camera();
-	}
+        if (forward)
+            degrees = -degrees;
 
-	@Override
-	protected void applyTransformation(float interpolatedTime, Transformation t) {
-		// Angle around the y-axis of the rotation at the given time. It is
-		// calculated both in radians and in the equivalent degrees.
-		final double radians = Math.PI * interpolatedTime;
-		float degrees = (float) (180.0 * radians / Math.PI);
+        final Matrix matrix = t.getMatrix();
 
-		// Once we reach the midpoint in the animation, we need to hide the
-		// source view and show the destination view. We also need to change
-		// the angle by 180 degrees so that the destination does not come in
-		// flipped around. This is the main problem with SDK sample, it does not
-		// do this.
-		if (interpolatedTime >= 0.5f) {
-			degrees -= 180.f;
+        camera.save();
+        camera.translate(0.0f, 0.0f, (float) (150.0 * Math.sin(radians)));
+        camera.rotateY(degrees);
+        camera.getMatrix(matrix);
+        camera.restore();
 
-			if (!visibilitySwapped) {
-				fromView.setVisibility(View.GONE);
-				toView.setVisibility(View.VISIBLE);
-
-				visibilitySwapped = true;
-			}
-		}
-
-		if (forward)
-			degrees = -degrees;
-
-		final Matrix matrix = t.getMatrix();
-
-		camera.save();
-		camera.translate(0.0f, 0.0f, (float) (150.0 * Math.sin(radians)));
-		camera.rotateY(degrees);
-		camera.getMatrix(matrix);
-		camera.restore();
-
-		matrix.preTranslate(-centerX, -centerY);
-		matrix.postTranslate(centerX, centerY);
-	}
+        matrix.preTranslate(-centerX, -centerY);
+        matrix.postTranslate(centerX, centerY);
+    }
 }

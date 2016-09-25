@@ -8,43 +8,43 @@ import com.devmarvel.creditcardentry.R;
 
 public class ZipCodeText extends CreditEntryFieldBase {
 
-	private int maxChars;
-	
+    private int maxChars;
+
     private String mHelperText;
 
-	public ZipCodeText(Context context) {
-		super(context);
-		init();
-	}
+    public ZipCodeText(Context context) {
+        super(context);
+        init();
+    }
 
-	public ZipCodeText(Context context, AttributeSet attrs) {
-		super(context, attrs);
-		init();
-	}
+    public ZipCodeText(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        init();
+    }
 
-	public ZipCodeText(Context context, AttributeSet attrs, int defStyle) {
-		super(context, attrs, defStyle);
-		init();
-	}
+    public ZipCodeText(Context context, AttributeSet attrs, int defStyle) {
+        super(context, attrs, defStyle);
+        init();
+    }
 
-	void init() {
-		super.init();
-		maxChars = 5;
-		setMaxChars(maxChars);
-		setHint("   ZIP   ");
-	}
+    void init() {
+        super.init();
+        maxChars = 5;
+        setMaxChars(maxChars);
+        setHint("   ZIP   ");
+    }
 
-	@Override
-	public void setHelperText(String helperText) {
-		mHelperText = helperText;
-	}
+    @Override
+    public String getHelperText() {
+        return (mHelperText != null ? mHelperText : context.getString(R.string.ZipHelp));
+    }
 
-	@Override
-	public String getHelperText() {
-		return (mHelperText != null ? mHelperText : context.getString(R.string.ZipHelp));
-	}
+    @Override
+    public void setHelperText(String helperText) {
+        mHelperText = helperText;
+    }
 
-	@Override
+    @Override
     public void textChanged(CharSequence s, int start, int before, int end) {
         // Check if only digits (for US zip codes)
         if (s.toString().matches("^\\d+$")) {
@@ -69,17 +69,17 @@ public class ZipCodeText extends CreditEntryFieldBase {
         }
     }
 
-	public void formatAndSetText(String text) {
-		this.removeTextChangedListener(this);
-		this.setText(text);
-		this.addTextChangedListener(this);
-	}
+    public void formatAndSetText(String text) {
+        this.removeTextChangedListener(this);
+        this.setText(text);
+        this.addTextChangedListener(this);
+    }
 
-	public void setMaxChars(int maxChars){
-		if (maxChars <= 0) {
-			return;
-		}
-		this.maxChars = maxChars;
-		setFilters(new InputFilter[]{new InputFilter.LengthFilter(maxChars)});
-	}
+    public void setMaxChars(int maxChars) {
+        if (maxChars <= 0) {
+            return;
+        }
+        this.maxChars = maxChars;
+        setFilters(new InputFilter[]{new InputFilter.LengthFilter(maxChars)});
+    }
 }

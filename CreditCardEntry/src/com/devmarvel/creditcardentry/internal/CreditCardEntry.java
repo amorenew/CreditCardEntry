@@ -59,20 +59,16 @@ public class CreditCardEntry extends HorizontalScrollView implements
     private final Context context;
     // null textColor means we want to use the system default color instead of providing our own.
     private final Integer textColor;
-
-    private ImageView cardImage;
-    private ImageView backCardImage;
     private final CreditCardText creditCardText;
     private final ExpDateText expDateText;
     private final SecurityCodeText securityCodeText;
     private final ZipCodeText zipCodeText;
-
+    private final TextView textFourDigits;
+    private ImageView cardImage;
+    private ImageView backCardImage;
     private Map<CreditEntryFieldBase, CreditEntryFieldBase> nextFocusField = new HashMap<>(4);
     private Map<CreditEntryFieldBase, CreditEntryFieldBase> prevFocusField = new HashMap<>(4);
     private List<CreditEntryFieldBase> includedFields = new ArrayList<>(4);
-
-    private final TextView textFourDigits;
-
     private TextView textHelper;
 
     private boolean showingBack;
@@ -300,14 +296,14 @@ public class CreditCardEntry extends HorizontalScrollView implements
 
     public void focusOnField(final CreditEntryFieldBase field, String initialFieldValue) {
         field.requestFocus();
-        if(!scrolling) {
+        if (!scrolling) {
             scrolling = true;
             scrollToTarget(field instanceof CreditCardText ? 0 : field.getLeft(), new Runnable() {
                 @Override
                 public void run() {
                     scrolling = false;
                     // if there was another focus before we were done.. catch up.
-                    if(!field.hasFocus()) {
+                    if (!field.hasFocus()) {
                         View newFocus = getFocusedChild();
                         if (newFocus instanceof CreditEntryFieldBase) {
                             focusOnField((CreditEntryFieldBase) newFocus);
@@ -317,7 +313,7 @@ public class CreditCardEntry extends HorizontalScrollView implements
             });
         }
 
-        if(initialFieldValue != null && initialFieldValue.length() > 0) {
+        if (initialFieldValue != null && initialFieldValue.length() > 0) {
             field.formatAndSetText(initialFieldValue);
         }
 
@@ -336,7 +332,7 @@ public class CreditCardEntry extends HorizontalScrollView implements
 
     private void scrollToTarget(int target, final Runnable after) {
         int scrollX = getScrollX();
-        if(scrollX == target) {
+        if (scrollX == target) {
             if (after != null) after.run();
         } else {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR1) {
@@ -460,11 +456,25 @@ public class CreditCardEntry extends HorizontalScrollView implements
                 delegate.onBadInput(field);
             }
 
-            @Override public void onExpirationDateValid(String remainder) {}
-            @Override public void onSecurityCodeValid(String remainder) {}
-            @Override public void onZipCodeValid() { }
-            @Override public void focusOnField(CreditEntryFieldBase field, String initialValue) { }
-            @Override public void focusOnPreviousField(CreditEntryFieldBase field) { }
+            @Override
+            public void onExpirationDateValid(String remainder) {
+            }
+
+            @Override
+            public void onSecurityCodeValid(String remainder) {
+            }
+
+            @Override
+            public void onZipCodeValid() {
+            }
+
+            @Override
+            public void focusOnField(CreditEntryFieldBase field, String initialValue) {
+            }
+
+            @Override
+            public void focusOnPreviousField(CreditEntryFieldBase field) {
+            }
         };
     }
 
@@ -584,54 +594,26 @@ public class CreditCardEntry extends HorizontalScrollView implements
     }
 
     @Override
-    public void onLongPress(MotionEvent e) {}
+    public void onLongPress(MotionEvent e) {
+    }
 
     @Override
     public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
         return false;
     }
 
-    @Override public void onShowPress(MotionEvent e) {}
+    @Override
+    public void onShowPress(MotionEvent e) {
+    }
 
     @Override
     public boolean onSingleTapUp(MotionEvent e) {
         return false;
     }
 
-    static class SavedState extends BaseSavedState {
-        SparseArray childrenStates;
-
-        SavedState(Parcelable superState) {
-            super(superState);
-        }
-
-        private SavedState(Parcel in, ClassLoader classLoader) {
-            super(in);
-            childrenStates = in.readSparseArray(classLoader);
-        }
-
-        @SuppressWarnings("unchecked")
-        @Override
-        public void writeToParcel(Parcel out, int flags) {
-            super.writeToParcel(out, flags);
-            out.writeSparseArray(childrenStates);
-        }
-
-        public static final Creator<SavedState> CREATOR
-                = ParcelableCompat.newCreator(new ParcelableCompatCreatorCallbacks<SavedState>() {
-            @Override
-            public SavedState createFromParcel(Parcel in, ClassLoader loader) {
-                return new SavedState(in, loader);
-            }
-
-            @Override
-            public SavedState[] newArray(int size) {
-                return new SavedState[size];
-            }
-        });
-    }
-
-    /** helper & hint setting **/
+    /**
+     * helper & hint setting
+     **/
 
     public void setCreditCardTextHelper(String text) {
         creditCardText.setHelperText(text);
@@ -663,6 +645,38 @@ public class CreditCardEntry extends HorizontalScrollView implements
 
     public void setZipCodeTextHint(String text) {
         zipCodeText.setHint(text);
+    }
+
+    static class SavedState extends BaseSavedState {
+        public static final Creator<SavedState> CREATOR
+                = ParcelableCompat.newCreator(new ParcelableCompatCreatorCallbacks<SavedState>() {
+            @Override
+            public SavedState createFromParcel(Parcel in, ClassLoader loader) {
+                return new SavedState(in, loader);
+            }
+
+            @Override
+            public SavedState[] newArray(int size) {
+                return new SavedState[size];
+            }
+        });
+        SparseArray childrenStates;
+
+        SavedState(Parcelable superState) {
+            super(superState);
+        }
+
+        private SavedState(Parcel in, ClassLoader classLoader) {
+            super(in);
+            childrenStates = in.readSparseArray(classLoader);
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            super.writeToParcel(out, flags);
+            out.writeSparseArray(childrenStates);
+        }
     }
 
 }
